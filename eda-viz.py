@@ -23,6 +23,14 @@ def read_data():
         for k, df in data.items()
     }
 
+    # Make sure that each index is unique
+    for table_path, df in data.items():
+
+        n_unique_indices = len(set(df.index.values))
+        n_rows = df.shape[0]
+        msg = f"Table ({table_path}) may only contain unique values in the first column."
+        assert n_unique_indices == n_rows, msg
+
     return data
 
 
