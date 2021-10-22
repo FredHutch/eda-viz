@@ -7,6 +7,9 @@ from scipy import stats
 import streamlit as st
 import plotly.express as px
 
+# GLOBAL VARIABLES
+template="plotly_white"
+st.subheader("Exploratory Data Analysis / Visualization")
 
 def read_data():
     """Read in all of the CSVs from the working directory."""
@@ -113,7 +116,7 @@ def data_is_aligned(params, data):
     if len(overlap) == 0:
 
         # Tell the user
-        st.write("Both tables must have the same set of row labels in the first (leftmost) column")
+        st.text("Both tables must have the same set of row labels in the first (leftmost) column")
 
         return False
 
@@ -165,7 +168,7 @@ def display_plot_comparison_all(params, data):
     
     # If there is no data
     if secondary_table.shape[1] == 0:
-        st.write(f"There are no columns in {params['secondary_table']} with data overlapping '{params['primary_col']}' in {params['primary_table']}")
+        st.text(f"There are no columns in {params['secondary_table']} with data overlapping '{params['primary_col']}' in {params['primary_table']}")
         return
 
     # Since there is data
@@ -192,7 +195,10 @@ def display_plot_comparison_all(params, data):
             ),
             x="R (pearson)",
             y="p-value (-log10)",
-            hover_data=["variable", "p"]
+            hover_data=["variable", "p"],
+            marginal_x="box",
+            marginal_y="box",
+            template=template
         )
     )
 
@@ -246,9 +252,11 @@ def display_plot_comparison_one(params, data):
         plot_df.iloc[:, 1]
     )
 
-    st.write(f"{plot_df.dropna().shape[0]:,} / {plot_df.shape[0]:,} entries have values for both '{params['primary_col']}' and '{params['secondary_col']}'")
-    st.write(f"Correlation coefficient: {comparison_stats['pearson_r']}")
-    st.write(f"p-value: {comparison_stats['p']}")
+    st.markdown(f"""
+    - {plot_df.dropna().shape[0]:,} / {plot_df.shape[0]:,} entries have values for both '{params['primary_col']}' and '{params['secondary_col']}'
+    - Correlation coefficient: {comparison_stats['pearson_r']}
+    - p-value: {comparison_stats['p']}
+    """)
     
 
     # If there is no data with aligned labels
@@ -261,7 +269,10 @@ def display_plot_comparison_one(params, data):
         px.scatter(
             plot_df,
             x=params['primary_col'],
-            y=params['secondary_col']
+            y=params['secondary_col'],
+            template=template,
+            marginal_x='box',
+            marginal_y='box'
         )
     )
 
@@ -276,21 +287,14 @@ def display_plot_distribution(params, data):
         rank_order=range(df.shape[0])
     ).reset_index()
 
-    print(df.columns.values[0])
-
-    st.write(
-        px.histogram(
-            df,
-            x=params['primary_col']
-        )
-    )
-
     st.write(
         px.scatter(
             df,
             y='rank_order',
             x=params['primary_col'],
-            hover_data=[df.columns.values[0], params['primary_col']]
+            hover_data=[df.columns.values[0], params['primary_col']],
+            marginal_x='histogram',
+            template=template
         )
     )
 
